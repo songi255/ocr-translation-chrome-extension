@@ -3,7 +3,13 @@ import { Crop } from "./scripts/capture";
 
 let isCaptureMode = false;
 let isStartPosPicked = false;
-const crop = { sx: 0, sy: 0, ex: 0, ey: 0 } as Crop;
+const crop = {
+  sx: 0,
+  sy: 0,
+  ex: 0,
+  ey: 0,
+  devicePixelRatio: window.devicePixelRatio,
+} as Crop;
 
 // setup `start` trigger
 // FIXME : temp
@@ -22,7 +28,7 @@ function startCapture() {
 }
 
 function endCapture() {
-  document.body.style.cursor = "default";
+  document.body.style.cursor = "auto";
 
   isCaptureMode = false;
   isStartPosPicked = false;
@@ -36,6 +42,16 @@ function endCapture() {
     } as BgMessage,
     (response: BgResponse) => {
       console.log(response);
+      fetch(response.base64)
+        .then((base64) => base64.blob())
+        .then((blob) => {
+          console.log(blob);
+
+          const img = new Image();
+          const url = URL.createObjectURL(blob);
+          img.src = url;
+          document.querySelector("body")?.appendChild(img);
+        });
     }
   );
 }
@@ -48,12 +64,12 @@ function onMouseDown(e: MouseEvent) {
 
   if (!isStartPosPicked) {
     isStartPosPicked = true;
-    crop.sx = e.pageX;
-    crop.sy = e.pageY;
+    crop.sx = e.clientX;
+    crop.sy = e.clientY;
     document.addEventListener("mousemove", onMouseMove);
   } else {
-    crop.ex = e.pageX;
-    crop.ey = e.pageY;
+    crop.ex = e.clientX;
+    crop.ey = e.clientY;
 
     document.removeEventListener("mousedown", onMouseDown);
     document.removeEventListener("mousemove", onMouseMove);
@@ -64,6 +80,6 @@ function onMouseDown(e: MouseEvent) {
 function onMouseMove(e: MouseEvent) {
   e.stopPropagation();
 
-  crop.ex = e.pageX;
-  crop.ey = e.pageY;
+  crop.ex = e.clientX;
+  crop.ey = e.clientY;
 }

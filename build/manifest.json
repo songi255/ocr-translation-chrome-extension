@@ -8,10 +8,8 @@
         "activeTab"
     ],
     "host_permissions": [
-        "https://chat.openai.com/*"
-    ],
-    "optional_host_permissions": [
-        "*://*/*"
+        "https://chat.openai.com/*",
+        "<all_urls>"
     ],
     "background": {
         "service_worker": "service_worker.js",

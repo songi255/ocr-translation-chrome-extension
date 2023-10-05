@@ -1,23 +1,20 @@
 import { createWorker } from "tesseract.js";
 
-class OCR {
-  // warning! worker is created asyncronousely.
-  private worker?: Tesseract.Worker;
+const worker = await createWorker({
+  logger: (m) => console.log(m),
+});
 
-  constructor() {
-    createWorker({
-      logger: (m) => console.log(m),
-    })
-      .then(async (worker) => {
-        this.worker = worker;
-        // TODO : initialize settings by local storage
-        await this.worker.loadLanguage("eng");
-        await this.worker.initialize("eng");
-      })
-      .catch(() => {
-        console.log("error occured in ");
-      });
-  }
+(async () => {
+  console.log(worker);
+  // TODO : initialize settings by local storage
+  await worker.loadLanguage("eng");
+  await worker.initialize("eng");
+  console.log(worker);
+})();
+
+class OCR {
+  // waring : always check worker is prepaired(not null).
+  private worker?: Tesseract.Worker;
 
   async setLoadLanguage(language: string) {
     await this.worker?.loadLanguage(language);
@@ -25,11 +22,11 @@ class OCR {
 
   /**
    *
-   * @param uri uri of target image.
+   * @param url url of target image.
    * @returns Promise of {data: text} object.
    */
-  recognize(uri: string) {
-    return this.worker?.recognize(uri);
+  recognize(url: string) {
+    return this.worker?.recognize(url);
   }
 
   /**
@@ -41,4 +38,5 @@ class OCR {
   }
 }
 
-export default new OCR();
+const ocr = new OCR();
+export { ocr };

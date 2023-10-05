@@ -6,8 +6,7 @@ interface BgMessage {
 }
 
 interface BgResponse {
-  original: "original text";
-  translated: "translated text";
+  base64: string;
 }
 
 /**
@@ -17,14 +16,21 @@ interface BgResponse {
  */
 chrome.runtime.onMessage.addListener(
   (message: BgMessage, sender, sendResponse) => {
+    console.log("service worker recieved message from content.js");
+    console.log(message);
     if (message.eventType === "request-operation") {
-      console.log("recieved message");
-      capture.capture(message.cropPos, (dataUrl) => {
-        // TODO : do ocr in here.
-        sendResponse({
-          original: "original text",
-          translated: "translated text",
-        } as BgResponse);
+      capture.capture(message.cropPos, (croppedBlob) => {
+        console.log(croppedBlob);
+
+        // serialize blob data to base 64
+        const reader = new FileReader();
+        reader.readAsDataURL(croppedBlob);
+        reader.onloadend = () => {
+          const base64 = reader.result;
+          sendResponse({
+            base64: base64,
+          } as BgResponse);
+        };
       });
       return true;
     }
