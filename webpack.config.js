@@ -5,6 +5,7 @@ module.exports = {
   entry: {
     service_worker: path.resolve(__dirname, "./", "src", "service_worker.ts"),
     content: path.resolve(__dirname, "./", "src", "content.ts"),
+    offscreen: path.resolve(__dirname, "./", "src", "offscreen.ts"),
   },
   output: {
     path: path.join(__dirname, "./build"),
@@ -25,6 +26,9 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [{ from: ".", to: ".", context: "public" }],
+    }),
+    new CopyPlugin({
+      patterns: [{ from: "./", to: "./tesseract", context: "src/tesseract" }],
     }),
   ],
 };

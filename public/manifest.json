@@ -5,7 +5,8 @@
     "description": "capture box image or video from web and translate it",
     "permissions": [
         "tabs",
-        "activeTab"
+        "activeTab",
+        "offscreen"
     ],
     "host_permissions": [
         "https://chat.openai.com/*",
@@ -23,6 +24,19 @@
             "matches": [
                 "http://*/*",
                 "https://*/*"
+            ]
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "tesseract/*"
+            ],
+            "matches": [
+                "<all_urls>"
             ]
         }
     ]

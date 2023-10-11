@@ -1,23 +1,33 @@
 import { createWorker } from "tesseract.js";
 
-const worker = await createWorker({
-  logger: (m) => console.log(m),
-});
-
-(async () => {
-  console.log(worker);
-  // TODO : initialize settings by local storage
-  await worker.loadLanguage("eng");
-  await worker.initialize("eng");
-  console.log(worker);
-})();
-
 class OCR {
-  // waring : always check worker is prepaired(not null).
-  private worker?: Tesseract.Worker;
+  private worker: Promise<Tesseract.Worker>;
 
+  constructor() {
+    this.worker = createWorker({
+      workerBlobURL: false,
+      cacheMethod: "none",
+      workerPath: "tesseract/worker.min.js",
+      corePath: "tesseract/tesseract-core.wasm.js",
+      langPath: "tesseract/eng.traineddata",
+      logger: (m) => console.log(m),
+      errorHandler: (e) => console.warn(e),
+    });
+    this.worker.then((worker) => {
+      this.setLoadLanguage("eng");
+    });
+  }
+
+  /**
+   *
+   * use promise chaining with initialize() to ensure that worker is prepaired.
+   * @param language target language
+   */
   async setLoadLanguage(language: string) {
-    await this.worker?.loadLanguage(language);
+    await this.worker.then(async (worker) => {
+      await worker.loadLanguage(language);
+      await worker.initialize(language);
+    });
   }
 
   /**
@@ -25,8 +35,8 @@ class OCR {
    * @param url url of target image.
    * @returns Promise of {data: text} object.
    */
-  recognize(url: string) {
-    return this.worker?.recognize(url);
+  async recognize(url: string) {
+    await this.worker.then(async (worker) => await worker.recognize(url));
   }
 
   /**
@@ -34,7 +44,7 @@ class OCR {
    * @returns Promise of terminate result.
    */
   terminate() {
-    this.worker?.terminate();
+    this.worker.then((worker) => worker.terminate());
   }
 }
 

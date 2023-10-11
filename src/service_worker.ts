@@ -1,5 +1,28 @@
 import { capture, Crop } from "./scripts/capture";
 
+// create offscreen for ocr
+
+let creating: Promise<void> | null;
+let isOffscreenOpened = false; // using chrome.runtime.getContexts() is solution(at google extension guide page) but not updated at @types/chrome yet.
+
+async function setupOffscreenDocument(path: string) {
+  if (isOffscreenOpened) return;
+
+  // create offscreen document
+  if (!creating) {
+    creating = chrome.offscreen.createDocument({
+      url: path,
+      reasons: [chrome.offscreen.Reason.BLOBS],
+      justification: "tesseract uses URL.createObjectUrl() method",
+    });
+  }
+  await creating;
+  // creating = null;
+  isOffscreenOpened = true;
+}
+
+// messaging codes
+
 interface BgMessage {
   eventType: "request-operation";
   cropPos: Crop;
@@ -7,17 +30,30 @@ interface BgMessage {
 
 interface BgResponse {
   base64: string;
+  text: string;
+}
+
+interface OcrRequest {
+  eventType: "request-ocr";
+  base64: string;
+}
+
+interface OcrResponse {
+  eventType: "response-ocr";
+  text: string;
 }
 
 /**
  *
- * handler of message from content.js
+ * handler of message from content.js or offscreen.js
  * @param sendResponse callback that provided and called from content.js for response
  */
 chrome.runtime.onMessage.addListener(
-  (message: BgMessage, sender, sendResponse) => {
+  (message: BgMessage | OcrResponse, sender, sendResponse) => {
     console.log("service worker recieved message from content.js");
     console.log(message);
+
+    // message from content.js as an capture request
     if (message.eventType === "request-operation") {
       capture.capture(message.cropPos, (croppedBlob) => {
         console.log(croppedBlob);
@@ -27,14 +63,33 @@ chrome.runtime.onMessage.addListener(
         reader.readAsDataURL(croppedBlob);
         reader.onloadend = () => {
           const base64 = reader.result;
-          sendResponse({
-            base64: base64,
-          } as BgResponse);
+
+          // ocr. send message to offscreen page.
+          setupOffscreenDocument("offscreen.html").then(() => {
+            chrome.runtime.sendMessage(
+              {
+                eventType: "request-ocr",
+                base64: base64,
+              } as OcrRequest,
+              (response: OcrResponse) => {
+                sendResponse({
+                  base64: base64,
+                  text: response.text,
+                } as BgResponse);
+              }
+            );
+          });
         };
       });
+      return true;
+    }
+
+    // message from offscreen.js as a response of ocr
+    if (message.eventType === "response-ocr") {
+      console.log(message.text);
       return true;
     }
   }
 );
 
-export { BgMessage, BgResponse };
+export { BgMessage, BgResponse, OcrRequest, OcrResponse };

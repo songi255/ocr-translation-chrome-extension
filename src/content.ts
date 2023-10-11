@@ -15,7 +15,10 @@ const crop = {
 // FIXME : temp
 document.addEventListener("mousedown", (e) => {
   if (!isCaptureMode) {
-    startCapture();
+    console.log(e.button);
+    if (e.button === 2) {
+      startCapture();
+    }
   }
 });
 
@@ -41,12 +44,13 @@ function endCapture() {
       cropPos: { ...crop },
     } as BgMessage,
     (response: BgResponse) => {
-      console.log(response);
+      console.log("ocr text : " + response.text);
       fetch(response.base64)
         .then((base64) => base64.blob())
         .then((blob) => {
           console.log(blob);
 
+          // img crop visual test
           const img = new Image();
           const url = URL.createObjectURL(blob);
           img.src = url;
