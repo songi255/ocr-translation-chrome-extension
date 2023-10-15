@@ -1,0 +1,43 @@
+{
+    "manifest_version": 3,
+    "name": "OCR Translation",
+    "version": "0.0.1",
+    "description": "capture box image or video from web and translate it",
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "offscreen"
+    ],
+    "host_permissions": [
+        "https://chat.openai.com/*",
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "service_worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "js": [
+                "content.js"
+            ],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ]
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "tesseract/*"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}

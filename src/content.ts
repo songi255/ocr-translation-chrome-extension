@@ -13,13 +13,32 @@ const crop = {
 
 // setup `start` trigger
 // FIXME : temp
+let leftDown = false;
+let rightDown = false;
+
 document.addEventListener("mousedown", (e) => {
+  if (e.button == 2) {
+    if (leftDown) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    rightDown = true;
+  }
+  if (e.button == 0) leftDown = true;
+
+  if (!(leftDown && rightDown)) return;
+
   if (!isCaptureMode) {
     console.log(e.button);
     if (e.button === 2) {
       startCapture();
     }
   }
+});
+
+document.addEventListener("mouseup", (e) => {
+  if (e.button == 2) rightDown = false;
+  if (e.button == 0) leftDown = false;
 });
 
 function startCapture() {
@@ -45,17 +64,19 @@ function endCapture() {
     } as BgMessage,
     (response: BgResponse) => {
       console.log("ocr text : " + response.text);
-      fetch(response.base64)
-        .then((base64) => base64.blob())
-        .then((blob) => {
-          console.log(blob);
 
-          // img crop visual test
-          const img = new Image();
-          const url = URL.createObjectURL(blob);
-          img.src = url;
-          document.querySelector("body")?.appendChild(img);
-        });
+      // img test code
+      // fetch(response.base64)
+      //   .then((base64) => base64.blob())
+      //   .then((blob) => {
+      //     console.log(blob);
+
+      //     // img crop visual test
+      //     const img = new Image();
+      //     const url = URL.createObjectURL(blob);
+      //     img.src = url;
+      //     document.querySelector("body")?.appendChild(img);
+      //   });
     }
   );
 }

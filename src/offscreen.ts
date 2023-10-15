@@ -1,12 +1,9 @@
 import { OcrRequest, OcrResponse } from "./service_worker";
 //import { ocr } from "./scripts/ocr";
 import { createWorker } from "tesseract.js";
+import { v4 } from "uuid";
 
 console.log("offscreen logging test");
-
-// async function setupOcr(){
-//   await ocr.initialize().then(() => ocr.setLoadLanguage("eng"));
-// }
 
 chrome.runtime.onMessage.addListener(
   (message: OcrRequest, sender, sendResponse) => {
@@ -38,6 +35,49 @@ chrome.runtime.onMessage.addListener(
 
           const result = await worker.recognize(url);
           console.log(result.data.text);
+
+          // tocken test
+          const auth = await fetch(
+            "https://chat.openai.com/api/auth/session",
+            {}
+          )
+            .then((r) => r.json())
+            .catch(() => ({}));
+          if (!auth.accessToken) {
+            throw new Error("UNAUTHORIZED");
+          }
+          const apiKey = auth.accessToken;
+
+          try {
+            const body = {
+              action: "next",
+              messages: [
+                {
+                  id: v4(),
+                  role: "user",
+                  content: {
+                    content_type: "text",
+                    parts: ["what is the capital of Korea?"],
+                  },
+                },
+              ],
+              model: "text-davinci-002-render",
+              parent_message_id: v4(),
+            };
+
+            await fetch("https://chat.openai.com/backend-api/conversation", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify(body),
+            }).then((res) => {
+              console.log(res);
+            });
+          } catch (e) {
+            console.error(e);
+          }
 
           sendResponse({
             eventType: "response-ocr",
