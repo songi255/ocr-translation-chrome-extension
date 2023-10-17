@@ -6,7 +6,8 @@
     "permissions": [
         "tabs",
         "activeTab",
-        "offscreen"
+        "offscreen",
+        "storage"
     ],
     "host_permissions": [
         "https://chat.openai.com/*",

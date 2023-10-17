@@ -1,33 +1,60 @@
-import { createWorker } from "tesseract.js";
+import Tesseract, { createWorker } from "tesseract.js";
 
 class OCR {
-  private worker: Promise<Tesseract.Worker>;
+  private worker: Tesseract.Worker | undefined;
+  private targetLanguage: string | undefined;
+  private workerInitializing: Promise<void> | undefined;
+  private languageInitializing: Promise<void> | undefined;
 
-  constructor() {
-    this.worker = createWorker({
-      workerBlobURL: false,
-      cacheMethod: "none",
-      workerPath: "tesseract/worker.min.js",
-      corePath: "tesseract/tesseract-core.wasm.js",
-      langPath: "tesseract/eng.traineddata",
-      logger: (m) => console.log(m),
-      errorHandler: (e) => console.warn(e),
-    });
-    this.worker.then((worker) => {
-      this.setLoadLanguage("eng");
-    });
+  /**
+   *
+   * This method is synchronized.
+   * Worker is cached. This method ensure that only one Worker is created.
+   */
+  async setupWorker() {
+    if (this.worker) return;
+    if (this.workerInitializing) {
+      await this.workerInitializing;
+      return;
+    }
+
+    this.workerInitializing = (async () => {
+      this.worker = await createWorker({
+        workerBlobURL: false,
+        cacheMethod: "none",
+        workerPath: "tesseract/worker.min.js",
+        corePath: "tesseract/tesseract-core.wasm.js",
+        langPath: "https://tessdata.projectnaptha.com/4.0.0",
+        logger: (m) => console.log(m),
+        errorHandler: (e) => console.error(e),
+      });
+    })();
+    await this.workerInitializing;
+
+    this.workerInitializing = undefined;
   }
 
   /**
    *
-   * use promise chaining with initialize() to ensure that worker is prepaired.
-   * @param language target language
+   * setupWorker before call this method or you might get an Error.
+   * @param language translation target language.
    */
-  async setLoadLanguage(language: string) {
-    await this.worker.then(async (worker) => {
-      await worker.loadLanguage(language);
-      await worker.initialize(language);
-    });
+  async setupLanguage(targetLanguage: string) {
+    if (targetLanguage == this.targetLanguage) return;
+    if (!this.worker) throw Error("Worker is not initilaized.");
+    if (this.languageInitializing) {
+      await this.languageInitializing;
+      return;
+    }
+
+    this.languageInitializing = (async () => {
+      await this.worker?.loadLanguage(targetLanguage);
+      await this.worker?.initialize(targetLanguage);
+      this.targetLanguage = targetLanguage;
+    })();
+    await this.languageInitializing;
+
+    this.languageInitializing = undefined;
   }
 
   /**
@@ -36,15 +63,21 @@ class OCR {
    * @returns Promise of {data: text} object.
    */
   async recognize(url: string) {
-    await this.worker.then(async (worker) => await worker.recognize(url));
+    if (!this.worker) throw Error("Worker is not initilaized.");
+
+    const result = await this.worker.recognize(url);
+    return result;
   }
 
   /**
    * exit worker.
    * @returns Promise of terminate result.
    */
-  terminate() {
-    this.worker.then((worker) => worker.terminate());
+  async terminate() {
+    if (!this.worker) return;
+
+    const result = await this.worker.terminate();
+    return result;
   }
 }
 
