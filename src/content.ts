@@ -1,5 +1,6 @@
 import { BgMessage, BgResponse } from "./service_worker";
 import { Crop } from "./scripts/capture";
+import { translator } from "./scripts/translate";
 
 let isCaptureMode = false;
 let isStartPosPicked = false;
@@ -62,8 +63,11 @@ function endCapture() {
       eventType: "request-operation",
       cropPos: { ...crop },
     } as BgMessage,
-    (response: BgResponse) => {
+    async (response: BgResponse) => {
       console.log("ocr text : " + response.text);
+
+      // do translate
+      //translator.requestTranslation("this is the sample text", "korean");
 
       // img test code
       // fetch(response.base64)

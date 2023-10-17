@@ -1,5 +1,6 @@
 import { OcrRequest, OcrResponse } from "./service_worker";
 import { ocr } from "./scripts/ocr";
+import { translator } from "./scripts/translate";
 
 chrome.runtime.onMessage.addListener(
   (message: OcrRequest, sender, sendResponse) => {
@@ -17,6 +18,7 @@ chrome.runtime.onMessage.addListener(
         console.log(result.data.text);
 
         // do translate
+        translator.requestTranslation("this is the sample text", "korean");
 
         // do response
         sendResponse({
