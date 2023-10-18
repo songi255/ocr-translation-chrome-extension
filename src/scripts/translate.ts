@@ -48,7 +48,6 @@ class Translator {
       `https://chat.openai.com/backend-api/conversation/${conversationId}`,
       {
         method: "PATCH",
-        mode: "no-cors",
         headers: {
           authorization: `Bearer ${await this.getAccessToken()}`,
           "content-type": "application/json",
@@ -56,6 +55,8 @@ class Translator {
         body: JSON.stringify({ is_visible: false }),
       }
     );
+    if (!response.ok) throw new Error("failed to delete conversation");
+
     return response;
   }
 
@@ -64,7 +65,7 @@ class Translator {
     destLanguage: string,
     options?: string[]
   ) {
-    const body = {
+    const requestBody = {
       action: "next",
       messages: [
         {
@@ -88,11 +89,70 @@ class Translator {
           "Content-Type": "application/json",
           Authorization: `Bearer ${await this.getAccessToken()}`,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(requestBody),
       }
     );
-    const result = await response.json();
-    console.log(result);
+
+    if (!response.ok) throw new Error("failed to request gpt call.");
+
+    const reader = response.body?.getReader() as ReadableStreamDefaultReader;
+    const readerGenerator = this.getReaderGenerator(reader);
+    const decoder = new TextDecoder();
+
+    let conversationId = "";
+    for await (const value of readerGenerator) {
+      const responseStr = decoder.decode(value);
+
+      try {
+        const parsedJsonArr = this.parseGptResponse(responseStr);
+        if (parsedJsonArr.length === 0) break;
+
+        conversationId = parsedJsonArr[0]["conversation_id"];
+        console.log(parsedJsonArr);
+      } catch (e) {
+        console.error("Error occured while parsing GPT response. Error : " + e);
+      }
+    }
+
+    console.log(conversationId);
+    this.deleteConversation(conversationId);
+  }
+
+  /**
+   * Helper function for processing ReadableStream.
+   *
+   * @param reader reader of ReadableStream.
+   * @returns async Generater function that returns `value` of readed data.
+   */
+  private async *getReaderGenerator(reader: ReadableStreamDefaultReader) {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) return;
+      yield value;
+    }
+  }
+
+  /**
+   * Helper function for parsing Gpt answer.
+   *
+   * @param responseString string of gpt response
+   * @returns Array of parsed JSON
+   * @throws JSON parsing error
+   */
+  private parseGptResponse(responseString: string) {
+    const result = responseString
+      .split("\n")
+      .filter((value) => {
+        if (value.length === 0) return false;
+        if (value === "data: [DONE]") return false;
+        return true;
+      })
+      .map((value) => {
+        const trim = value.replace("data: ", "");
+        return JSON.parse(trim);
+      });
+
+    return result;
   }
 }
 
