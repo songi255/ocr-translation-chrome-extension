@@ -18,7 +18,20 @@ chrome.runtime.onMessage.addListener(
         console.log(result.data.text);
 
         // do translate
-        translator.requestTranslation("this is the sample text", "korean");
+        try {
+          await translator.getAccessToken();
+        } catch (e) {
+          console.error("Check your chatgpt session.", e);
+        }
+
+        translator.requestTranslation(
+          result.data.text,
+          "korean",
+          (translatedText) => {
+            console.log(translatedText);
+          },
+          []
+        );
 
         // do response
         sendResponse({

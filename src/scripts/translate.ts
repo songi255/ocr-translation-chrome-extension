@@ -5,18 +5,15 @@ class Translator {
   private fetchingAuth: Promise<void> | undefined;
 
   /**
-   * Caching accessTocken with local variable first, and chrome session storage second.
+   * Caching accessTocken with local variable.
    * If fetching is not available, throws Error.
+   *
+   * You can check auth state with this method. (whether Error occured or not.)
+   *
+   * @throws UNAUTHORIZED Error occured when failed to get auth key.
    */
   async getAccessToken() {
     if (this.accessToken) return this.accessToken;
-
-    const storageKey = "openai_access_tocken";
-    /*await chrome.storage.session.setAccessLevel({
-      accessLevel: chrome.storage.AccessLevel.TRUSTED_CONTEXTS,
-    });
-    const result = await chrome.storage.session.get(storageKey);
-    if (result[storageKey]) return result[storageKey];*/
 
     if (this.fetchingAuth) {
       await this.fetchingAuth;
@@ -34,8 +31,6 @@ class Translator {
       if (!auth.accessToken) throw new Error("UNAUTHORIZED");
 
       this.accessToken = auth.accessToken;
-
-      //chrome.storage.session.set({ storageKey: this.accessTocken });
     })();
     await this.fetchingAuth;
     this.fetchingAuth = undefined;
@@ -43,7 +38,7 @@ class Translator {
     return this.accessToken;
   }
 
-  async deleteConversation(conversationId: string) {
+  private async deleteConversation(conversationId: string) {
     const response = await fetch(
       `https://chat.openai.com/backend-api/conversation/${conversationId}`,
       {
@@ -60,10 +55,9 @@ class Translator {
     return response;
   }
 
-  async requestTranslation(
-    targetText: string,
-    destLanguage: string,
-    options?: string[]
+  private async requestConversation(
+    prompt: string,
+    callback: (response: string) => void
   ) {
     const requestBody = {
       action: "next",
@@ -73,7 +67,7 @@ class Translator {
           role: "user",
           content: {
             content_type: "text",
-            parts: ["what is the capital of Korea?"],
+            parts: [prompt],
           },
         },
       ],
@@ -107,15 +101,42 @@ class Translator {
         const parsedJsonArr = this.parseGptResponse(responseStr);
         if (parsedJsonArr.length === 0) break;
 
-        conversationId = parsedJsonArr[0]["conversation_id"];
-        console.log(parsedJsonArr);
+        const assistMessage = parsedJsonArr[parsedJsonArr.length - 1];
+        console.log(assistMessage);
+
+        conversationId = assistMessage["conversation_id"];
+        const result = assistMessage.message?.content?.parts?.[0];
+        if (!result) continue;
+
+        callback(result);
       } catch (e) {
         console.error("Error occured while parsing GPT response. Error : " + e);
       }
     }
 
     console.log(conversationId);
-    this.deleteConversation(conversationId);
+    if (conversationId) this.deleteConversation(conversationId);
+  }
+
+  async requestTranslation(
+    targetText: string,
+    targetLanguage: string,
+    callback: (translatedText: string) => void,
+    options?: string[]
+  ) {
+    const prompt = `
+    Translate "${targetText}" to ${targetLanguage}.
+
+    Please ensure to follow these instructions or guidelines:
+    - The provided text is recognized text from an image.
+    - It may contain typos, missing words, or unusual words.
+    - If deemed necessary, feel free to paraphrase it and provide additional explanations.
+    - Only Awnser with the results and additional explanation if needed.
+    ${options && options.length > 0 ? "- " : ""}${options?.join("\n- ") ?? ""}].
+    `;
+    console.log(prompt);
+
+    this.requestConversation(prompt, callback);
   }
 
   /**
