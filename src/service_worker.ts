@@ -1,12 +1,17 @@
 import { capture, Crop } from "./scripts/capture";
 
 // create offscreen for ocr
-
 let creating: Promise<void> | null;
-let isOffscreenOpened = false; // using chrome.runtime.getContexts() is solution(at google extension guide page) but not updated at @types/chrome yet.
-
 async function setupOffscreenDocument(path: string) {
-  if (isOffscreenOpened) return;
+  const offscreenUrl = chrome.runtime.getURL(path);
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: ["OFFSCREEN_DOCUMENT"],
+    documentUrls: [offscreenUrl],
+  });
+
+  if (existingContexts.length > 0) {
+    return;
+  }
 
   // create offscreen document
   if (!creating) {
@@ -17,8 +22,7 @@ async function setupOffscreenDocument(path: string) {
     });
   }
   await creating;
-  // creating = null;
-  isOffscreenOpened = true;
+  creating = null;
 }
 
 // messaging codes

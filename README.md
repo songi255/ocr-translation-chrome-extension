@@ -3,5 +3,5 @@
 TODOS:
 
 - inject ui/ux : gpt prompt injection option
-- offscreen bugfix
+  - zero size error handle
 - context connection bugfix
