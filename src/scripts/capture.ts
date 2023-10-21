@@ -1,11 +1,3 @@
-interface Crop {
-  sx: number;
-  sy: number;
-  ex: number;
-  ey: number;
-  devicePixelRatio: number;
-}
-
 /**
  * this class uses `chrome.tabs.captureVisibleTab()` which can only called in background.js. (can not use in content.js)
  */
@@ -45,4 +37,4 @@ class Capture {
 }
 
 const capture = new Capture();
-export { Crop, capture };
+export { capture };

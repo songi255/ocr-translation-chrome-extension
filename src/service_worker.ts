@@ -1,4 +1,4 @@
-import { capture, Crop } from "./scripts/capture";
+import { capture } from "./scripts/capture";
 
 // create offscreen for ocr
 let creating: Promise<void> | null;
@@ -23,28 +23,6 @@ async function setupOffscreenDocument(path: string) {
   }
   await creating;
   creating = null;
-}
-
-// messaging codes
-
-interface BgMessage {
-  eventType: "request-operation";
-  cropPos: Crop;
-}
-
-interface BgResponse {
-  base64: string;
-  text: string;
-}
-
-interface OcrRequest {
-  eventType: "request-ocr";
-  base64: string;
-}
-
-interface OcrResponse {
-  eventType: "response-ocr";
-  text: string;
 }
 
 /**
@@ -95,5 +73,3 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
-
-export { BgMessage, BgResponse, OcrRequest, OcrResponse };

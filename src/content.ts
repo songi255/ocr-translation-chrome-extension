@@ -1,5 +1,3 @@
-import { BgMessage, BgResponse } from "./service_worker";
-import { Crop } from "./scripts/capture";
 import { translator } from "./scripts/translate";
 
 let isCaptureMode = false;

@@ -1,4 +1,3 @@
-import { OcrRequest, OcrResponse } from "./service_worker";
 import { ocr } from "./scripts/ocr";
 import { translator } from "./scripts/translate";
 
