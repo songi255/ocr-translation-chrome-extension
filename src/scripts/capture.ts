@@ -15,6 +15,7 @@ class Capture {
    *
    * @param (sx, sy), (ex, ey) is couple of point that defines region. Order is not important.
    * @param callback function that recieve url string of captured image.
+   * @throws zero size error
    */
   capture(crop: Crop, callback: (blob: Blob) => void) {
     const ratio = crop.devicePixelRatio;
@@ -24,26 +25,23 @@ class Capture {
     const ey = Math.max(crop.sy, crop.ey) * ratio;
     const w = ex - sx;
     const h = ey - sy;
+    if (w == 0 || h == 0) throw new Error("capture region can't be zero size.");
 
-    chrome.tabs.captureVisibleTab({ format: "png" }, (dataUrl) => {
+    chrome.tabs.captureVisibleTab({ format: "png" }, async (dataUrl) => {
       const canvas = new OffscreenCanvas(w / ratio, h / ratio);
       const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("can not make canvas context");
 
-      fetch(dataUrl)
-        .then((res) => res.blob())
-        .then((blob) => createImageBitmap(blob))
-        .then((img) =>
-          ctx?.drawImage(img, sx, sy, w, h, 0, 0, w / ratio, h / ratio)
-        )
-        .then(() => canvas.convertToBlob())
-        .then((blob) => callback(blob));
+      const data = await fetch(dataUrl);
+      const dataBlob = await data.blob();
+      const img = await createImageBitmap(dataBlob);
+
+      ctx.drawImage(img, sx, sy, w, h, 0, 0, w / ratio, h / ratio);
+      const resultBlob = await canvas.convertToBlob();
+
+      callback(resultBlob);
     });
   }
-
-  /**
-   * save captured image to file.
-   */
-  saveToFile() {}
 }
 
 const capture = new Capture();

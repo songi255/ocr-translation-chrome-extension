@@ -30,7 +30,6 @@ document.addEventListener("mousedown", (e) => {
   if (!(leftDown && rightDown)) return;
 
   if (!isCaptureMode) {
-    console.log(e.button);
     if (e.button === 2) {
       startCapture();
     }
@@ -56,7 +55,8 @@ function endCapture() {
   isCaptureMode = false;
   isStartPosPicked = false;
 
-  console.log(crop);
+  if (crop.sx == crop.ex || crop.sy == crop.ey)
+    throw new Error("capture region size can't be zero.");
 
   chrome.runtime.sendMessage(
     {
