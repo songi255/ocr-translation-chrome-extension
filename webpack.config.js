@@ -3,9 +3,14 @@ const CopyPlugin = require("copy-webpack-plugin");
 module.exports = {
   mode: "production",
   entry: {
-    service_worker: path.resolve(__dirname, "./", "src", "service_worker.ts"),
-    content: path.resolve(__dirname, "./", "src", "content.ts"),
-    offscreen: path.resolve(__dirname, "./", "src", "offscreen.ts"),
+    service_worker: path.resolve(
+      __dirname,
+      "./",
+      "src/service_worker",
+      "service_worker.ts"
+    ),
+    content: path.resolve(__dirname, "./", "src/content", "content.ts"),
+    offscreen: path.resolve(__dirname, "./", "src/offscreen", "offscreen.ts"),
   },
   output: {
     path: path.join(__dirname, "./build"),

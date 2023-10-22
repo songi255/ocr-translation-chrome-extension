@@ -4,27 +4,17 @@ declare namespace chrome.runtime {
 
 // interfaces
 
-interface BgMessage {
-  eventType: "request-operation";
-  cropPos: Crop;
+interface Message {
+  eventType:
+    | "start-capture"
+    | "request-screenshot"
+    | "request-operation"
+    | "response-operation"
+    | "show-result";
+  message?: any;
 }
 
-interface BgResponse {
-  base64: string;
-  text: string;
-}
-
-interface OcrRequest {
-  eventType: "request-ocr";
-  base64: string;
-}
-
-interface OcrResponse {
-  eventType: "response-ocr";
-  text: string;
-}
-
-interface Crop {
+interface Crop extends Message {
   sx: number;
   sy: number;
   ex: number;

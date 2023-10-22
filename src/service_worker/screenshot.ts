@@ -1,7 +1,7 @@
 /**
  * this class uses `chrome.tabs.captureVisibleTab()` which can only called in background.js. (can not use in content.js)
  */
-class Capture {
+class ScreenShot {
   /**
    * capture current tab's region.
    *
@@ -9,7 +9,7 @@ class Capture {
    * @param callback function that recieve url string of captured image.
    * @throws zero size error
    */
-  capture(crop: Crop, callback: (blob: Blob) => void) {
+  screenshot(crop: Crop, callback: (blob: Blob) => void) {
     const ratio = crop.devicePixelRatio;
     const sx = Math.min(crop.sx, crop.ex) * ratio;
     const sy = Math.min(crop.sy, crop.ey) * ratio;
@@ -36,5 +36,5 @@ class Capture {
   }
 }
 
-const capture = new Capture();
-export { capture };
+const screenshot = new ScreenShot();
+export { screenshot };
