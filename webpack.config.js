@@ -17,7 +17,7 @@ module.exports = {
     filename: "[name].js",
   },
   resolve: {
-    extensions: [".ts", ".js"],
+    extensions: [".ts", ".js", ".tsx"],
   },
   module: {
     rules: [
@@ -30,10 +30,10 @@ module.exports = {
   },
   plugins: [
     new CopyPlugin({
-      patterns: [{ from: ".", to: ".", context: "public" }],
-    }),
-    new CopyPlugin({
-      patterns: [{ from: "./", to: "./tesseract", context: "src/tesseract" }],
+      patterns: [
+        { from: ".", to: ".", context: "public" },
+        { from: "./", to: "./tesseract", context: "src/tesseract" },
+      ],
     }),
   ],
 };
