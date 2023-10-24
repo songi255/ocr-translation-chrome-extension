@@ -1,0 +1,36 @@
+.capture-guide {
+  position: relative;
+}
+
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* 반투명한 마스크 스타일 */
+}
+
+.guides {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.horizontal-line {
+  position: absolute;
+  width: 100%;
+  height: 2px; /* 가로 보조선 높이 */
+  background: red; /* 가로 보조선 색상 */
+  top: 50%; /* 수직 중앙 정렬 */
+}
+
+.vertical-line {
+  position: absolute;
+  width: 2px; /* 세로 보조선 너비 */
+  height: 100%;
+  background: red; /* 세로 보조선 색상 */
+  left: 50%; /* 수평 중앙 정렬 */
+}

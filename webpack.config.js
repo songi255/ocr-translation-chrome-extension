@@ -9,7 +9,7 @@ module.exports = {
       "src/service_worker",
       "service_worker.ts"
     ),
-    content: path.resolve(__dirname, "./", "src/content", "content.ts"),
+    content: path.resolve(__dirname, "./", "src/content", "content.tsx"),
     offscreen: path.resolve(__dirname, "./", "src/offscreen", "offscreen.ts"),
   },
   output: {
@@ -17,7 +17,7 @@ module.exports = {
     filename: "[name].js",
   },
   resolve: {
-    extensions: [".ts", ".js", ".tsx"],
+    extensions: [".ts", ".js", ".tsx", ".css", ".scss"],
   },
   module: {
     rules: [
@@ -26,13 +26,31 @@ module.exports = {
         loader: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        test: /\.scss$/,
+        use: [
+          { loader: "style-loader" },
+          { loader: "css-modules-typescript-loader" },
+          { loader: "css-loader", options: { modules: true } },
+          { loader: "sass-loader" },
+        ],
+      },
     ],
   },
   plugins: [
     new CopyPlugin({
       patterns: [
         { from: ".", to: ".", context: "public" },
-        { from: "./", to: "./tesseract", context: "src/tesseract" },
+        {
+          from: "./dist/worker.min.js",
+          to: "./tesseract",
+          context: "node_modules/tesseract.js",
+        },
+        {
+          from: "./tesseract-core.wasm.js",
+          to: "./tesseract",
+          context: "node_modules/tesseract.js-core",
+        },
       ],
     }),
   ],
