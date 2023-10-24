@@ -1,36 +1,27 @@
-.capture-guide {
-  position: relative;
-}
-
-.mask {
-  position: absolute;
+.cg-mask {
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* 반투명한 마스크 스타일 */
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1;
 }
 
-.guides {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.cg-hline {
+  position: fixed;
+  width: 100vw;
+  height: 1px;
+  background: red;
+  left: 0%;
+  top: 50%;
 }
 
-.horizontal-line {
-  position: absolute;
-  width: 100%;
-  height: 2px; /* 가로 보조선 높이 */
-  background: red; /* 가로 보조선 색상 */
-  top: 50%; /* 수직 중앙 정렬 */
-}
-
-.vertical-line {
-  position: absolute;
-  width: 2px; /* 세로 보조선 너비 */
-  height: 100%;
-  background: red; /* 세로 보조선 색상 */
-  left: 50%; /* 수평 중앙 정렬 */
+.cg-vline {
+  position: fixed;
+  width: 1px;
+  height: 100vh;
+  background: red;
+  top: 0%;
+  left: 50%;
 }

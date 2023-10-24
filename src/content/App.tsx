@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CaptureGuide from "./CaptureGuide/CaptureGuide";
 import ResultView from "./ResultView/ResultView";
+import "./App.scss";
 
 function App() {
   const [isCaptureMode, setCaptureMode] = useState(false);
@@ -25,10 +26,10 @@ function App() {
   }
 
   return (
-    <div>
+    <>
       {isCaptureMode ? <CaptureGuide /> : null}
       {isShowingResult ? <ResultView /> : null}
-    </div>
+    </>
   );
 }
 

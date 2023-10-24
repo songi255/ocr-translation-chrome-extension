@@ -3,14 +3,13 @@ import "./CaptureGuide.scss";
 
 function CaptureGuide() {
   return (
-    <div className="capture-guide">
-      <div className="mask"></div>
-      <div className="guides">
-        {/* 가로 및 세로 보조선 */}
-        <div className="horizontal-line"></div>
-        <div className="vertical-line"></div>
+    <>
+      <div className="cg-mask"></div>
+      <div className="cg-lines">
+        <div className="cg-hline"></div>
+        <div className="cg-vline"></div>
       </div>
-    </div>
+    </>
   );
 }
 
