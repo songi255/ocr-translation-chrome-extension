@@ -1,3 +1,5 @@
+import { getOrderedPoints } from "../utils/utils";
+
 /**
  * this class uses `chrome.tabs.captureVisibleTab()` which can only called in background.js. (can not use in content.js)
  */
@@ -10,11 +12,16 @@ class ScreenShot {
    * @throws zero size error
    */
   screenshot(crop: Crop, callback: (blob: Blob) => void) {
-    const ratio = crop.devicePixelRatio;
-    const sx = Math.min(crop.sx, crop.ex) * ratio;
-    const sy = Math.min(crop.sy, crop.ey) * ratio;
-    const ex = Math.max(crop.sx, crop.ex) * ratio;
-    const ey = Math.max(crop.sy, crop.ey) * ratio;
+    const ratio = crop.devicePixelRatio as number;
+    const [sp, ep] = getOrderedPoints(
+      crop.startPoint as Point,
+      crop.endPoint as Point
+    );
+
+    const sx = sp.x * ratio;
+    const sy = sp.y * ratio;
+    const ex = ep.x * ratio;
+    const ey = ep.y * ratio;
     const w = ex - sx;
     const h = ey - sy;
     if (w == 0 || h == 0) throw new Error("capture region can't be zero size.");

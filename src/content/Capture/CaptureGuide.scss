@@ -1,0 +1,26 @@
+$maskColor: rgba(0, 0, 0, 0.7);
+
+.cg-mask {
+  position: fixed;
+  background: $maskColor;
+  z-index: 1;
+}
+
+$guideLineThickness: 1px;
+$guideLineColor: red;
+
+.cg-hline {
+  position: fixed;
+  width: 100vw;
+  height: $guideLineThickness;
+  background: $guideLineColor;
+  left: 0px;
+}
+
+.cg-vline {
+  position: fixed;
+  width: $guideLineThickness;
+  height: 100vh;
+  background: $guideLineColor;
+  top: 0px;
+}

@@ -14,10 +14,18 @@ interface Message {
   message?: any;
 }
 
-interface Crop extends Message {
-  sx: number;
-  sy: number;
-  ex: number;
-  ey: number;
-  devicePixelRatio: number;
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface Crop {
+  startPoint?: Point;
+  endPoint?: Point;
+  devicePixelRatio?: number;
+}
+
+interface TranslateResult {
+  originalText: string;
+  translatedText: string;
 }

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import CaptureGuide from "./CaptureGuide/CaptureGuide";
 import ResultView from "./ResultView/ResultView";
 import "./App.scss";
+import Capture from "./Capture/Capture";
 
 function App() {
   const [isCaptureMode, setCaptureMode] = useState(false);
   const [isShowingResult, setShowingResult] = useState(false);
+  const [translateResult, setTranslateResult] = useState(null as any);
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener(messageListener);
@@ -20,15 +21,19 @@ function App() {
     }
     if (message.eventType === "show-result") {
       setShowingResult(true);
-      const resultText = message.message;
-      console.log(resultText);
+      setTranslateResult(message.message);
     }
   }
 
   return (
     <>
-      {isCaptureMode ? <CaptureGuide /> : null}
-      {isShowingResult ? <ResultView /> : null}
+      {isCaptureMode ? <Capture setCaptureMode={setCaptureMode} /> : null}
+      {isShowingResult ? (
+        <ResultView
+          setShowingResult={setShowingResult}
+          result={{ ...translateResult }}
+        />
+      ) : null}
     </>
   );
 }

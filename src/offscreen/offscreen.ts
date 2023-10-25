@@ -10,7 +10,8 @@ chrome.runtime.onMessage.addListener(async (message: Message) => {
     // do ocr
     await ocr.setupWorker();
     await ocr.setupLanguage("eng");
-    const result = await ocr.recognize(url);
+    const ocrResult = await ocr.recognize(url);
+    const originalText = ocrResult.data.text;
 
     // do translate
     try {
@@ -20,12 +21,15 @@ chrome.runtime.onMessage.addListener(async (message: Message) => {
     }
 
     await translator.requestTranslation(
-      result.data.text,
+      originalText,
       "korean",
       (translatedText) => {
         chrome.runtime.sendMessage({
           eventType: "response-operation",
-          message: translatedText,
+          message: {
+            originalText,
+            translatedText,
+          } as TranslateResult,
         } as Message);
       },
       []

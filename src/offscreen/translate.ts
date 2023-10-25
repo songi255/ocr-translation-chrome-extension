@@ -104,6 +104,11 @@ class Translator {
         const assistMessage = parsedJsonArr[parsedJsonArr.length - 1];
         console.log(assistMessage);
 
+        if (assistMessage.error) {
+          callback(assistMessage.errer);
+          continue;
+        }
+
         conversationId = assistMessage["conversation_id"];
         const result = assistMessage.message?.content?.parts?.[0];
         if (!result) continue;
