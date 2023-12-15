@@ -71,7 +71,7 @@ class Translator {
           },
         },
       ],
-      model: "text-davinci-002-render",
+      model: "gpt-3.5-turbo",
       parent_message_id: v4(),
     };
 

@@ -37,9 +37,18 @@ function Capture({ setCaptureMode }: CaptureProps) {
   }
 
   function mouseUpListener(ev: MouseEvent) {
+    const finalCrop = { ...crop, endPoint: { x: ev.clientX, y: ev.clientY } };
+    if (
+      finalCrop.startPoint?.x === finalCrop.endPoint.x ||
+      finalCrop.startPoint?.y === finalCrop.endPoint.y
+    ) {
+      console.error("capture region size can't be zero.");
+      return;
+    }
+
     chrome.runtime.sendMessage({
       eventType: "request-screenshot",
-      message: { ...crop, endPoint: { x: ev.clientX, y: ev.clientY } },
+      message: finalCrop,
     } as Message);
 
     setCrop({ devicePixelRatio: window.devicePixelRatio });
